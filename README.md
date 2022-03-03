@@ -1,0 +1,1 @@
+# practice-for-week-11-efficient-querying-in-sequelize-short-practice
