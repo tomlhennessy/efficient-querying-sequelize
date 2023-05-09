@@ -1,4 +1,4 @@
-server/db/*.db
-server/.env
-server/test.js
+*.db
+.env
 node_modules/
+server/test.js
