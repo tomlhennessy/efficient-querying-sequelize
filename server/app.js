@@ -21,7 +21,7 @@ app.use(express.json());
 app.get('/test-benchmark-logging', async (req, res) => {   // > 100 ms execution time
     const books = await Book.findAll({
         include: [
-            { model: Author }, 
+            { model: Author },
             { model: Review },
             { model: Reviewer }
         ],
@@ -35,80 +35,20 @@ app.get('/test-benchmark-logging', async (req, res) => {   // > 100 ms execution
 
 // STEP #1: Benchmark a Frequently-Used Query
 app.get('/books', async (req, res) => {
-
-    let books = await Book.findAll({
-        include: Author,
-    });
-
-    // Filter by price if there is a maxPrice defined in the query params
+    const whereClause = {};
     if (req.query.maxPrice) {
-        books = books.filter(book => book.price < parseInt(req.query.maxPrice));
-    };
-    res.json(books);
-});
-
-    // 1a. Analyze:
-
-        // Record Executed Query and Baseline Benchmark Below:
-
-        // - What is happening in the code of the query itself?
-
-
-        // - What exactly is happening as SQL executes this query? 
- 
-
-
-
-// 1b. Identify Opportunities to Make Query More Efficient
-
-    // - What could make this query more efficient?
-
-
-// 1c. Refactor the Query in GET /books
-
-
-
-// 1d. Benchmark the Query after Refactoring
-
-    // Record Executed Query and Baseline Benchmark Below:
-
-    // Is the refactored query more efficient than the original? Why or Why Not?
-
-
-
-
-
-// STEP #2: Benchmark and Refactor Another Query
-app.patch('/authors/:authorId/books', async (req, res) => {
-    const author = await Author.findOne({
-        include: { model: Book },
-        where: {
-            id: req.params.authorId
-        }
-    });
-
-    if (!author) {
-        res.status(404);
-        return res.json({
-            message: 'Unable to find an author with the specified authorId'
-        });
-    }
-
-    for (let book of author.Books) {
-        book.price = req.body.price;
-        await book.save();
+        whereClause.price = { [Op.lt]: parseInt(req.query.maxPrice) }; // filter by price in SQL
     }
 
     const books = await Book.findAll({
-        where: {
-            authorId: author.id
+        where: whereClause, // apply SQL filtering
+        include: {
+            model: Author,
+            attributes: ['id', 'firstName', 'lastName'], // fetch only needed columns
         }
-    });
+    })
 
-    res.json({
-        message: `Successfully updated all authors.`,
-        books
-    });
+    res.json(books);
 });
 
 
@@ -129,7 +69,7 @@ app.get('/reviews', async (req, res) => {
 
     const reviews = await Review.findAll({
         include: {
-            model: Reviewer, 
+            model: Reviewer,
             where: whereClause,
             attributes: ['firstName', 'lastName']
         },
@@ -168,5 +108,5 @@ app.get('/authors/:authorId/books', async (req, res) => {
 });
 
 // Set port and listen for incoming requests - DO NOT MODIFY
-const port = 5000;
+const port = 5001;
 app.listen(port, () => console.log('Server is listening on port', port));

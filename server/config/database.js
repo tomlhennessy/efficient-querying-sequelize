@@ -7,7 +7,8 @@ module.exports = {
     typeValidation: true,
 
     // STEP #0a: Configure Benchmarking
-
+    benchmark: true,
+    logging: console.log
     // Your code here
   },
   test: {
